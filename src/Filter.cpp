@@ -86,12 +86,11 @@ void hiros::skeletons::Filter::setupRosTopics()
   out_skeleton_group_pub = nh_.advertise<hiros_skeleton_msgs::SkeletonGroup>(params_.output_topic, 1);
 }
 
-void hiros::skeletons::Filter::callback(const hiros_skeleton_msgs::SkeletonGroup& msg)
+void hiros::skeletons::Filter::callback(const hiros_skeleton_msgs::SkeletonGroup& sg)
 {
-  skeleton_group_ = hiros::skeletons::utils::toStruct(msg);
-  eraseUnusedFilters();
+  skeleton_group_ = hiros::skeletons::utils::toStruct(sg);
   filter();
-  out_skeleton_group_pub.publish(hiros::skeletons::utils::toMsg(msg.header, skeleton_group_));
+  out_skeleton_group_pub.publish(hiros::skeletons::utils::toMsg(skeleton_group_));
 }
 
 void hiros::skeletons::Filter::init(hiros::skeletons::types::Skeleton& skeleton)
@@ -103,7 +102,7 @@ void hiros::skeletons::Filter::init(hiros::skeletons::types::Skeleton& skeleton)
   for (auto& mkg : skeleton.marker_groups) {
     for (auto& mk : mkg.markers) {
       filters_[skeleton.id][mkg.id][mk.id] = StateSpaceFilter3D();
-      filters_[skeleton.id][mkg.id][mk.id].filter(mk.point, skeleton_group_.src_time, params_.cutoff_frequency);
+      filters_[skeleton.id][mkg.id][mk.id].filter(mk.point, skeleton_group_.time, params_.cutoff_frequency);
     }
   }
 }
@@ -157,13 +156,15 @@ void hiros::skeletons::Filter::filter(hiros::skeletons::types::Skeleton& skeleto
       }
 
       // filter all the marker trajectories
-      filters_.at(skeleton.id)[mkg.id][mk.id].filter(mk.point, skeleton_group_.src_time, params_.cutoff_frequency);
+      filters_.at(skeleton.id)[mkg.id][mk.id].filter(mk.point, skeleton_group_.time, params_.cutoff_frequency);
     }
   }
 }
 
 void hiros::skeletons::Filter::filter()
 {
+  eraseUnusedFilters();
+
   for (auto& skeleton : skeleton_group_.skeletons) {
     filter(skeleton);
   }

@@ -36,7 +36,7 @@ namespace hiros {
     {
     public:
       Filter() {}
-      Filter(hiros::skeletons::types::Skeleton& skeleton, const double& time, const double& cutoff);
+      Filter(hiros::skeletons::types::Skeleton& skeleton, const double& cutoff);
       ~Filter() {}
 
       void configure();
@@ -46,7 +46,7 @@ namespace hiros {
       void stop();
       void setupRosTopics();
 
-      void callback(const hiros_skeleton_msgs::SkeletonGroup& msg);
+      void callback(const hiros_skeleton_msgs::SkeletonGroup& sg);
 
       void init(hiros::skeletons::types::Skeleton& skeleton);
       void eraseUnusedFilters();
