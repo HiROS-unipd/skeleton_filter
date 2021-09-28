@@ -5,7 +5,7 @@ add_compile_options(-std=c++2a)
 
 # Find catkin macros and libraries if COMPONENTS list like find_package(catkin
 # REQUIRED COMPONENTS xyz) is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp hiros_skeleton_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp tf2 hiros_skeleton_msgs)
 
 # System dependencies are found with CMake's conventions
 find_package(RTB_Filter)
@@ -26,7 +26,7 @@ include_directories(include
 # single CMake context The recommended prefix ensures that target names across
 # packages don't collide add_executable(${PROJECT_NAME}_node
 add_executable(${PROJECT_NAME}_node src/main.cpp src/Filter.cpp src/MarkerFilter.cpp
-               src/SkeletonFilter.cpp)
+               src/OrientationFilter.cpp src/SkeletonFilter.cpp)
 
 # Rename C++ executable without prefix The above recommended prefix causes long
 # target names, the following renames the target back to the shorter version for
