@@ -1,4 +1,4 @@
-# skeleton_filter
+# Hi-ROS Skeleton Filter
 
 
 ## Dependencies
