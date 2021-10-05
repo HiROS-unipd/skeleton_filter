@@ -5,8 +5,7 @@
 #include <map>
 
 // Internal dependencies
-#include "skeleton_filter/MarkerFilter.h"
-#include "skeleton_filter/OrientationFilter.h"
+#include "skeleton_filter/KinematicStateFilter.h"
 
 namespace hiros {
   namespace skeletons {
@@ -18,20 +17,26 @@ namespace hiros {
       SkeletonFilter(hiros::skeletons::types::Skeleton& skeleton, const double& cutoff);
       ~SkeletonFilter() {}
 
-      void filter(hiros::skeletons::types::Skeleton& skeleton, const double& cutoff);
-      void filter(hiros::skeletons::types::Skeleton& skeleton, const double& cutoff) const;
+      // Get filtered value and update the filter's internal state
+      void filter(hiros::skeletons::types::Skeleton& skeleton,
+                  const double& cutoff = std::numeric_limits<double>::quiet_NaN());
+
+      // Get filtered value without modifying the filter's internal state
+      void filter(hiros::skeletons::types::Skeleton& skeleton,
+                  const double& cutoff = std::numeric_limits<double>::quiet_NaN()) const;
 
     private:
       void init(hiros::skeletons::types::Skeleton& skeleton, const double& cutoff);
 
-      void updateMarkerFilters(hiros::skeletons::types::Skeleton& t_skeleton, const double& cutoff);
-      void updateOrientationFilters(hiros::skeletons::types::Skeleton& t_skeleton, const double& cutoff);
+      void updateMarkerFilters(hiros::skeletons::types::Skeleton& t_skeleton);
+      void updateLinkFilters(hiros::skeletons::types::Skeleton& t_skeleton);
 
-      // map<marker_group_id, <marker_id, marker_filter>>
-      std::map<int, std::map<int, MarkerFilter>> marker_filters_{};
-      // map<orientation_group_id, <orientation_id, orientation_filter>>
-      std::map<int, std::map<int, OrientationFilter>> orientation_filters_{};
+      // map<marker_id, marker_filter>
+      std::map<int, KinematicStateFilter> marker_filters_{};
+      // map<link_id, link_filter>
+      std::map<int, KinematicStateFilter> link_filters_{};
 
+      double cutoff_{};
       bool initialized_{false};
     };
 
