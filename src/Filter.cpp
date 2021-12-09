@@ -55,6 +55,7 @@ void hiros::skeletons::Filter::stop()
   }
 
   ROS_INFO_STREAM(BASH_MSG_GREEN << "Hi-ROS Skeleton Filter... STOPPED" << BASH_MSG_RESET);
+  ros::shutdown();
 }
 
 void hiros::skeletons::Filter::setupRosTopics()
@@ -71,6 +72,11 @@ void hiros::skeletons::Filter::setupRosTopics()
 
 void hiros::skeletons::Filter::callback(const hiros_skeleton_msgs::SkeletonGroup& msg)
 {
+  if (!ros::ok()) {
+    stop();
+    exit(EXIT_FAILURE);
+  }
+
   skeleton_group_ = hiros::skeletons::utils::toStruct(msg);
 
   filter();
