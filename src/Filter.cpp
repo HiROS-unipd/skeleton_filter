@@ -63,8 +63,8 @@ void hiros::skeletons::Filter::setupRosTopics()
   in_skeleton_group_sub = nh_.subscribe(params_.input_topic, 1, &Filter::callback, this);
 
   while (in_skeleton_group_sub.getNumPublishers() == 0 && !ros::isShuttingDown()) {
-    ROS_WARN_STREAM_THROTTLE(
-      2, "Hi-ROS Skeleton Filter... No input messages on input topic '" << params_.input_topic << "'");
+    ROS_WARN_STREAM_DELAYED_THROTTLE(
+      2, "Hi-ROS Skeleton Filter Warning: No input messages on input topic '" << params_.input_topic << "'");
   }
 
   out_skeleton_group_pub = nh_.advertise<hiros_skeleton_msgs::SkeletonGroup>(params_.output_topic, 1);

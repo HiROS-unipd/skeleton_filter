@@ -14,13 +14,15 @@ namespace hiros {
       void filter(hiros::skeletons::types::KinematicState& state, const double& time, const double& cutoff);
 
     private:
-      void computeOrientation(hiros::skeletons::types::KinematicState& state, const double& time, const double& cutoff);
+      void computePosition(hiros::skeletons::types::KinematicState& state, const double& time, const double& cutoff);
+      void computeLinearVelocity(hiros::skeletons::types::KinematicState& state);
+      void computeLinearAcceleration(hiros::skeletons::types::KinematicState& state);
 
+      void computeOrientation(hiros::skeletons::types::KinematicState& state, const double& time, const double& cutoff);
       void computeAngularVelocity(hiros::skeletons::types::KinematicState& state,
                                   const hiros::skeletons::types::KinematicState& prev_state,
                                   const double& prev_time,
                                   const double& cutoff);
-
       void computeAngularAcceleration(hiros::skeletons::types::KinematicState& state,
                                       const hiros::skeletons::types::KinematicState& prev_state,
                                       const double& prev_time,
