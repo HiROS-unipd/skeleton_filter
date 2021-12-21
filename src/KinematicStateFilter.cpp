@@ -14,21 +14,25 @@ void hiros::skeletons::KinematicStateFilter::filter(hiros::skeletons::types::Kin
   auto prev_time = m_last_time;
   auto prev_state = m_last_state;
 
-  state.pose.position.setX(pos_filters_[0].filter(state.pose.position.x(), time, cutoff));
-  state.pose.position.setY(pos_filters_[1].filter(state.pose.position.y(), time, cutoff));
-  state.pose.position.setZ(pos_filters_[2].filter(state.pose.position.z(), time, cutoff));
+  if (!skeletons::utils::isNaN(state.pose.position)) {
+    state.pose.position.setX(pos_filters_[0].filter(state.pose.position.x(), time, cutoff));
+    state.pose.position.setY(pos_filters_[1].filter(state.pose.position.y(), time, cutoff));
+    state.pose.position.setZ(pos_filters_[2].filter(state.pose.position.z(), time, cutoff));
 
-  state.velocity.linear.setX(pos_filters_[0].getFilteredFirstDerivative());
-  state.velocity.linear.setY(pos_filters_[1].getFilteredFirstDerivative());
-  state.velocity.linear.setZ(pos_filters_[2].getFilteredFirstDerivative());
+    state.velocity.linear.setX(pos_filters_[0].getFilteredFirstDerivative());
+    state.velocity.linear.setY(pos_filters_[1].getFilteredFirstDerivative());
+    state.velocity.linear.setZ(pos_filters_[2].getFilteredFirstDerivative());
 
-  state.acceleration.linear.setX(pos_filters_[0].getFilteredSecondDerivative());
-  state.acceleration.linear.setY(pos_filters_[1].getFilteredSecondDerivative());
-  state.acceleration.linear.setZ(pos_filters_[2].getFilteredSecondDerivative());
+    state.acceleration.linear.setX(pos_filters_[0].getFilteredSecondDerivative());
+    state.acceleration.linear.setY(pos_filters_[1].getFilteredSecondDerivative());
+    state.acceleration.linear.setZ(pos_filters_[2].getFilteredSecondDerivative());
+  }
 
-  computeOrientation(state, time, cutoff);
-  computeAngularVelocity(state, prev_state, prev_time, cutoff);
-  computeAngularAcceleration(state, prev_state, prev_time, cutoff);
+  if (!skeletons::utils::isNaN(state.pose.orientation)) {
+    computeOrientation(state, time, cutoff);
+    computeAngularVelocity(state, prev_state, prev_time, cutoff);
+    computeAngularAcceleration(state, prev_state, prev_time, cutoff);
+  }
 }
 
 void hiros::skeletons::KinematicStateFilter::computeOrientation(hiros::skeletons::types::KinematicState& state,
