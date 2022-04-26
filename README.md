@@ -18,13 +18,13 @@ Contains an example on how to set some parameters of choice
 
 ## Parameters
 
-| Parameter           | Description                                                                     |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `node_required`     | Set if the other ROS nodes on the PC should be killed when the driver is killed |
-| `node_name`         | Node name                                                                       |
-| `input_topic`       | Topic containing the input skeletons                                            |
-| `output_topic`      | Topic that will be published containing the filtered skeletons                  |
-| `cutoff_frequency`  | Cutoff frequency of the filter                                                  |
+| Parameter           | Description                                                                   |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `node_required`     | Set if the other ROS nodes on the PC should be killed when the node is killed |
+| `node_name`         | Node name                                                                     |
+| `input_topic`       | Topic containing the input skeletons                                          |
+| `output_topic`      | Topic that will be published containing the filtered skeletons                |
+| `cutoff_frequency`  | Cutoff frequency of the filter                                                |
 
 
 ## Usage

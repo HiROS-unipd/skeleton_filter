@@ -109,7 +109,7 @@ void hiros::skeletons::Filter::filter(hiros::skeletons::types::Skeleton& skeleto
     init(skeleton);
   }
 
-  filters_.at(skeleton.id).filter(skeleton, params_.cutoff_frequency);
+  filters_.at(skeleton.id).filter(skeleton);
 }
 
 void hiros::skeletons::Filter::init(hiros::skeletons::types::Skeleton& skeleton)

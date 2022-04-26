@@ -11,27 +11,30 @@ namespace hiros {
     class KinematicStateFilter
     {
     public:
-      void filter(hiros::skeletons::types::KinematicState& state, const double& time, const double& cutoff);
+      KinematicStateFilter() {}
+      KinematicStateFilter(const double& cutoff_frequency);
+      ~KinematicStateFilter() {}
+
+      void filter(hiros::skeletons::types::KinematicState& state, const double& time);
 
     private:
-      void computePosition(hiros::skeletons::types::KinematicState& state, const double& time, const double& cutoff);
+      void computePosition(hiros::skeletons::types::KinematicState& state, const double& time);
       void computeLinearVelocity(hiros::skeletons::types::KinematicState& state);
       void computeLinearAcceleration(hiros::skeletons::types::KinematicState& state);
 
-      void computeOrientation(hiros::skeletons::types::KinematicState& state, const double& time, const double& cutoff);
+      void computeOrientation(hiros::skeletons::types::KinematicState& state, const double& time);
       void computeAngularVelocity(hiros::skeletons::types::KinematicState& state,
                                   const hiros::skeletons::types::KinematicState& prev_state,
-                                  const double& prev_time,
-                                  const double& cutoff);
+                                  const double& prev_time);
       void computeAngularAcceleration(hiros::skeletons::types::KinematicState& state,
                                       const hiros::skeletons::types::KinematicState& prev_state,
-                                      const double& prev_time,
-                                      const double& cutoff);
+                                      const double& prev_time);
 
+      double cutoff_frequency_{};
       std::array<rtb::Filter::StateSpaceFilter<double>, 3> pos_filters_;
 
-      double m_last_time{std::numeric_limits<double>::quiet_NaN()};
-      hiros::skeletons::types::KinematicState m_last_state{};
+      double last_time_{std::numeric_limits<double>::quiet_NaN()};
+      hiros::skeletons::types::KinematicState last_state_{};
     };
 
   } // namespace skeletons

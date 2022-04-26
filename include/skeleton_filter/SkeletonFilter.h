@@ -14,19 +14,17 @@ namespace hiros {
     {
     public:
       SkeletonFilter() {}
-      SkeletonFilter(hiros::skeletons::types::Skeleton& skeleton, const double& cutoff);
+      SkeletonFilter(hiros::skeletons::types::Skeleton& skeleton, const double& cutoff_frequency);
       ~SkeletonFilter() {}
 
       // Get filtered value and update the filter's internal state
-      void filter(hiros::skeletons::types::Skeleton& skeleton,
-                  const double& cutoff = std::numeric_limits<double>::quiet_NaN());
+      void filter(hiros::skeletons::types::Skeleton& skeleton);
 
       // Get filtered value without modifying the filter's internal state
-      void filter(hiros::skeletons::types::Skeleton& skeleton,
-                  const double& cutoff = std::numeric_limits<double>::quiet_NaN()) const;
+      void filter(hiros::skeletons::types::Skeleton& skeleton) const;
 
     private:
-      void init(hiros::skeletons::types::Skeleton& skeleton, const double& cutoff);
+      void init(hiros::skeletons::types::Skeleton& skeleton);
 
       void updateMarkerFilters(hiros::skeletons::types::Skeleton& t_skeleton);
       void updateLinkFilters(hiros::skeletons::types::Skeleton& t_skeleton);
@@ -36,7 +34,7 @@ namespace hiros {
       // map<link_id, link_filter>
       std::map<int, KinematicStateFilter> link_filters_{};
 
-      double cutoff_{};
+      double cutoff_frequency_{};
       bool initialized_{false};
     };
 
