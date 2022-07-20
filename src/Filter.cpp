@@ -103,6 +103,10 @@ void hiros::skeletons::Filter::callback(const hiros_skeleton_msgs::SkeletonGroup
     exit(EXIT_FAILURE);
   }
 
+  if (msg.skeletons.empty()) {
+    return;
+  }
+
   skeleton_group_ = hiros::skeletons::utils::toStruct(msg);
 
   filter();
