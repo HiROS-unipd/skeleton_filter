@@ -24,6 +24,9 @@ Contains an example on how to set some parameters of choice
 | `node_name`         | Node name                                                                     |
 | `input_topic`       | Topic containing the input skeletons                                          |
 | `output_topic`      | Topic that will be published containing the filtered skeletons                |
+| `filter`            | Filter to use (`statespace` or `butterworth`)                                 |
+| `butterworth_order` | Order of the Butterworth filter                                               |
+| `sample_frequency`  | Input data sample frequency (only required for Butterworth filter)            |
 | `cutoff_frequency`  | Cutoff frequency of the filter                                                |
 
 

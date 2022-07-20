@@ -6,13 +6,16 @@
   <!--**********************************************************-->
   <include file="$(find hiros_skeleton_filter)/launch/default.launch">
 
-    <arg name="node_required"    value="true"                 />
-    <arg name="node_name"        value="node_01"              />
+    <arg name="node_required"     value="true"                 />
+    <arg name="node_name"         value="node_01"              />
 
-    <arg name="input_topic"      value="/raw_skel_group"      />
-    <arg name="output_topic"     value="/filtered_skel_group" />
-    <arg name="cutoff_frequency" value="6.0"                  />
+    <arg name="input_topic"       value="/raw_skel_group"      />
+    <arg name="output_topic"      value="/filtered_skel_group" />
 
+    <arg name="filter"            value="butterworth"          />
+    <arg name="butterworth_order" value="4"                    />
+    <arg name="sample_frequency"  value="30"                   />
+    <arg name="cutoff_frequency"  value="6"                    />
   </include>
 
 </launch>

@@ -2,13 +2,41 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 
 // Custom external dependencies
+#include "rtb/Filter/Designer.h"
 #include "skeletons/utils.h"
 
 // Internal dependencies
 #include "skeleton_filter/KinematicStateFilter.h"
 
-hiros::skeletons::KinematicStateFilter::KinematicStateFilter(const double& cutoff_frequency)
-  : cutoff_frequency_(cutoff_frequency){};
+hiros::skeletons::KinematicStateFilter::KinematicStateFilter(const Type& filter_type,
+                                                             const double& cutoff_frequency,
+                                                             const double& sample_frequency,
+                                                             const unsigned int& butterworth_order)
+  : filter_type_(filter_type)
+  , cutoff_frequency_(cutoff_frequency)
+  , sample_frequency_(sample_frequency)
+  , butterworth_order_(butterworth_order)
+{
+  switch (filter_type_) {
+    case Type::StateSpace:
+      break;
+
+    case Type::Butterworth: {
+      rtb::Filter::TransferFunction<double> butterworth_tf(
+        rtb::Filter::butter<double>(butterworth_order_, cutoff_frequency_, sample_frequency_));
+
+      for (auto& filter : butterworth_filters_) {
+        filter.setTransferFunction(butterworth_tf);
+      }
+    }
+
+    break;
+
+    default:
+      std::cerr << "KinematicStateFilter Error: Unsupported filter type" << std::endl;
+      break;
+  }
+};
 
 void hiros::skeletons::KinematicStateFilter::filter(hiros::skeletons::types::KinematicState& state, const double& time)
 {
@@ -31,23 +59,61 @@ void hiros::skeletons::KinematicStateFilter::filter(hiros::skeletons::types::Kin
 void hiros::skeletons::KinematicStateFilter::computePosition(hiros::skeletons::types::KinematicState& state,
                                                              const double& time)
 {
-  state.pose.position.setX(pos_filters_[0].filter(state.pose.position.x(), time, cutoff_frequency_));
-  state.pose.position.setY(pos_filters_[1].filter(state.pose.position.y(), time, cutoff_frequency_));
-  state.pose.position.setZ(pos_filters_[2].filter(state.pose.position.z(), time, cutoff_frequency_));
+  switch (filter_type_) {
+    case Type::StateSpace:
+      state.pose.position.setX(statespace_filters_[0].filter(state.pose.position.x(), time, cutoff_frequency_));
+      state.pose.position.setY(statespace_filters_[1].filter(state.pose.position.y(), time, cutoff_frequency_));
+      state.pose.position.setZ(statespace_filters_[2].filter(state.pose.position.z(), time, cutoff_frequency_));
+      break;
+
+    case Type::Butterworth:
+      state.pose.position.setX(butterworth_filters_[0].filter(state.pose.position.x()));
+      state.pose.position.setY(butterworth_filters_[1].filter(state.pose.position.y()));
+      state.pose.position.setZ(butterworth_filters_[2].filter(state.pose.position.z()));
+      break;
+
+    default:
+      std::cerr << "KinematicStateFilter Error: computePosition()" << std::endl;
+      break;
+  }
 }
 
 void hiros::skeletons::KinematicStateFilter::computeLinearVelocity(hiros::skeletons::types::KinematicState& state)
 {
-  state.velocity.linear.setX(pos_filters_[0].getFilteredFirstDerivative());
-  state.velocity.linear.setY(pos_filters_[1].getFilteredFirstDerivative());
-  state.velocity.linear.setZ(pos_filters_[2].getFilteredFirstDerivative());
+  switch (filter_type_) {
+    case Type::StateSpace:
+      state.velocity.linear.setX(statespace_filters_[0].getFilteredFirstDerivative());
+      state.velocity.linear.setY(statespace_filters_[1].getFilteredFirstDerivative());
+      state.velocity.linear.setZ(statespace_filters_[2].getFilteredFirstDerivative());
+      break;
+
+    case Type::Butterworth:
+      // Not supported yet
+      break;
+
+    default:
+      std::cerr << "KinematicStateFilter Error: computeLinearVelocity()" << std::endl;
+      break;
+  }
 }
 
 void hiros::skeletons::KinematicStateFilter::computeLinearAcceleration(hiros::skeletons::types::KinematicState& state)
 {
-  state.acceleration.linear.setX(pos_filters_[0].getFilteredSecondDerivative());
-  state.acceleration.linear.setY(pos_filters_[1].getFilteredSecondDerivative());
-  state.acceleration.linear.setZ(pos_filters_[2].getFilteredSecondDerivative());
+  switch (filter_type_) {
+    case Type::StateSpace:
+      state.acceleration.linear.setX(statespace_filters_[0].getFilteredSecondDerivative());
+      state.acceleration.linear.setY(statespace_filters_[1].getFilteredSecondDerivative());
+      state.acceleration.linear.setZ(statespace_filters_[2].getFilteredSecondDerivative());
+      break;
+
+    case Type::Butterworth:
+      // Not supported yet
+      break;
+
+    default:
+      std::cerr << "KinematicStateFilter Error: computeLinearAcceleration()" << std::endl;
+      break;
+  }
 }
 
 void hiros::skeletons::KinematicStateFilter::computeOrientation(hiros::skeletons::types::KinematicState& state,

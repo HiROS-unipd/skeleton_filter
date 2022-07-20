@@ -15,7 +15,33 @@ void hiros::skeletons::Filter::configure()
 
   nh_.getParam("input_topic", params_.input_topic);
   nh_.getParam("output_topic", params_.output_topic);
+
+  nh_.getParam("filter", params_.filter_type);
+  nh_.getParam("butterworth_order", params_.butterworth_order);
+  nh_.getParam("sample_frequency", params_.sample_frequency);
   nh_.getParam("cutoff_frequency", params_.cutoff_frequency);
+
+  if (!filter_str_to_type.contains(params_.filter_type)) {
+    ROS_FATAL_STREAM("Hi-ROS Skeleton Filter ERROR: Filter type '" << params_.filter_type
+                                                                   << "' not supported. Unable to continue");
+    stop();
+    ros::shutdown();
+    exit(EXIT_FAILURE);
+  }
+
+  if (params_.filter_type == "butterworth" && params_.butterworth_order <= 0) {
+    ROS_FATAL_STREAM("Hi-ROS Skeleton Filter ERROR: Butterworth order <= 0. Unable to continue");
+    stop();
+    ros::shutdown();
+    exit(EXIT_FAILURE);
+  }
+
+  if (params_.filter_type == "butterworth" && params_.sample_frequency <= 0) {
+    ROS_FATAL_STREAM("Hi-ROS Skeleton Filter ERROR: Sample frequency <= 0. Unable to continue");
+    stop();
+    ros::shutdown();
+    exit(EXIT_FAILURE);
+  }
 
   if (params_.cutoff_frequency <= 0) {
     ROS_FATAL_STREAM("Hi-ROS Skeleton Filter ERROR: Cutoff frequency <= 0. Unable to continue");
@@ -46,12 +72,12 @@ void hiros::skeletons::Filter::stop()
 {
   ROS_INFO_STREAM("Hi-ROS Skeleton Filter... Stopping");
 
-  if (in_skeleton_group_sub) {
-    in_skeleton_group_sub.shutdown();
+  if (in_skeleton_group_sub_) {
+    in_skeleton_group_sub_.shutdown();
   }
 
-  if (out_skeleton_group_pub) {
-    out_skeleton_group_pub.shutdown();
+  if (out_skeleton_group_pub_) {
+    out_skeleton_group_pub_.shutdown();
   }
 
   ROS_INFO_STREAM(BASH_MSG_GREEN << "Hi-ROS Skeleton Filter... STOPPED" << BASH_MSG_RESET);
@@ -60,14 +86,14 @@ void hiros::skeletons::Filter::stop()
 
 void hiros::skeletons::Filter::setupRosTopics()
 {
-  in_skeleton_group_sub = nh_.subscribe(params_.input_topic, 1, &Filter::callback, this);
+  in_skeleton_group_sub_ = nh_.subscribe(params_.input_topic, 1, &Filter::callback, this);
 
-  while (in_skeleton_group_sub.getNumPublishers() == 0 && !ros::isShuttingDown()) {
+  while (in_skeleton_group_sub_.getNumPublishers() == 0 && !ros::isShuttingDown()) {
     ROS_WARN_STREAM_DELAYED_THROTTLE(
       2, "Hi-ROS Skeleton Filter Warning: No input messages on input topic '" << params_.input_topic << "'");
   }
 
-  out_skeleton_group_pub = nh_.advertise<hiros_skeleton_msgs::SkeletonGroup>(params_.output_topic, 1);
+  out_skeleton_group_pub_ = nh_.advertise<hiros_skeleton_msgs::SkeletonGroup>(params_.output_topic, 1);
 }
 
 void hiros::skeletons::Filter::callback(const hiros_skeleton_msgs::SkeletonGroup& msg)
@@ -95,7 +121,7 @@ void hiros::skeletons::Filter::filter()
 void hiros::skeletons::Filter::publish()
 {
   skeleton_group_.time = ros::Time::now().toSec();
-  out_skeleton_group_pub.publish(hiros::skeletons::utils::toMsg(skeleton_group_));
+  out_skeleton_group_pub_.publish(hiros::skeletons::utils::toMsg(skeleton_group_));
 }
 
 void hiros::skeletons::Filter::eraseUnusedFilters()
@@ -118,5 +144,10 @@ void hiros::skeletons::Filter::init(hiros::skeletons::types::Skeleton& skeleton)
     filters_.erase(skeleton.id);
   }
 
-  filters_.emplace(skeleton.id, SkeletonFilter(skeleton, params_.cutoff_frequency));
+  filters_.emplace(skeleton.id,
+                   SkeletonFilter(skeleton,
+                                  filter_str_to_type.at(params_.filter_type),
+                                  params_.cutoff_frequency,
+                                  params_.sample_frequency,
+                                  static_cast<unsigned int>(params_.butterworth_order)));
 }

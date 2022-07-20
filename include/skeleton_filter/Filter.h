@@ -20,10 +20,17 @@
 namespace hiros {
   namespace skeletons {
 
+    static const std::map<std::string, Type> filter_str_to_type = {{"statespace", Type::StateSpace},
+                                                                   {"butterworth", Type::Butterworth}};
+
     struct Parameters
     {
       std::string input_topic;
       std::string output_topic;
+
+      std::string filter_type;
+      int butterworth_order;
+      double sample_frequency;
       double cutoff_frequency;
     };
 
@@ -53,8 +60,8 @@ namespace hiros {
       ros::NodeHandle nh_{"~"};
       Parameters params_{};
 
-      ros::Subscriber in_skeleton_group_sub{};
-      ros::Publisher out_skeleton_group_pub{};
+      ros::Subscriber in_skeleton_group_sub_{};
+      ros::Publisher out_skeleton_group_pub_{};
 
       hiros::skeletons::types::SkeletonGroup skeleton_group_{};
 
