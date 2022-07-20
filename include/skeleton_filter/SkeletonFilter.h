@@ -32,6 +32,12 @@ namespace hiros {
 
     private:
       void init(hiros::skeletons::types::Skeleton& skeleton);
+      void initMarkerFilter(hiros::skeletons::types::Marker& marker, const double& time);
+      void initLinkFilter(hiros::skeletons::types::Link& link, const double& time);
+
+      bool converged(const hiros::skeletons::types::KinematicState& lhs,
+                     const hiros::skeletons::types::KinematicState& rhs,
+                     const double& epsilon) const;
 
       void updateMarkerFilters(hiros::skeletons::types::Skeleton& skeleton);
       void updateLinkFilters(hiros::skeletons::types::Skeleton& skeleton);

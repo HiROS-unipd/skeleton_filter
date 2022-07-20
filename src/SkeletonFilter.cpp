@@ -4,6 +4,8 @@
 // Internal dependencies
 #include "skeleton_filter/SkeletonFilter.h"
 
+const double k_epsilon = 1e-4;
+
 hiros::skeletons::SkeletonFilter::SkeletonFilter(hiros::skeletons::types::Skeleton& skeleton,
                                                  const Type& filter_type,
                                                  const double& cutoff_frequency,
@@ -41,19 +43,69 @@ void hiros::skeletons::SkeletonFilter::init(hiros::skeletons::types::Skeleton& s
 {
   if (!initialized_) {
     for (auto& mk : skeleton.markers) {
-      marker_filters_[mk.id] =
-        KinematicStateFilter(filter_type_, cutoff_frequency_, sample_frequency_, butterworth_order_);
-      marker_filters_[mk.id].filter(mk.center, skeleton.src_time);
+      initMarkerFilter(mk, skeleton.src_time);
     }
 
     for (auto& lk : skeleton.links) {
-      link_filters_[lk.id] =
-        KinematicStateFilter(filter_type_, cutoff_frequency_, sample_frequency_, butterworth_order_);
-      link_filters_[lk.id].filter(lk.center, skeleton.src_time);
+      initLinkFilter(lk, skeleton.src_time);
     }
 
     initialized_ = true;
   }
+}
+
+void hiros::skeletons::SkeletonFilter::initMarkerFilter(hiros::skeletons::types::Marker& marker, const double& time)
+{
+  hiros::skeletons::types::KinematicState marker_center_copy;
+
+  marker_filters_[marker.id] =
+    KinematicStateFilter(filter_type_, cutoff_frequency_, sample_frequency_, butterworth_order_);
+
+  // Hack to always have initial filtered value ~ initial raw value
+  do {
+    marker_center_copy = marker.center;
+    marker_filters_[marker.id].filter(marker_center_copy, time);
+  } while (!converged(marker.center, marker_center_copy, k_epsilon));
+  marker.center = marker_center_copy;
+}
+
+void hiros::skeletons::SkeletonFilter::initLinkFilter(hiros::skeletons::types::Link& link, const double& time)
+{
+  hiros::skeletons::types::KinematicState link_center_copy;
+
+  link_filters_[link.id] = KinematicStateFilter(filter_type_, cutoff_frequency_, sample_frequency_, butterworth_order_);
+
+  // Hack to always have initial filtered value ~ initial raw value
+  do {
+    link_center_copy = link.center;
+    link_filters_[link.id].filter(link_center_copy, time);
+  } while (!converged(link.center, link_center_copy, k_epsilon));
+  link.center = link_center_copy;
+}
+
+bool hiros::skeletons::SkeletonFilter::converged(const hiros::skeletons::types::KinematicState& lhs,
+                                                 const hiros::skeletons::types::KinematicState& rhs,
+                                                 const double& epsilon) const
+{
+  if (utils::isNaN(lhs.pose) || utils::isNaN(rhs.pose)) {
+    return true;
+  }
+
+  bool converged = true;
+
+  if (!utils::isNaN(lhs.pose.position) && !utils::isNaN(lhs.pose.position)) {
+    if (utils::distance(lhs.pose.position, rhs.pose.position) / utils::magnitude(lhs.pose.position) > epsilon) {
+      converged = false;
+    }
+  }
+
+  if (!utils::isNaN(lhs.pose.orientation) && !utils::isNaN(lhs.pose.orientation)) {
+    if (utils::distance(lhs.pose.orientation, rhs.pose.orientation) > epsilon) {
+      converged = false;
+    }
+  }
+
+  return converged;
 }
 
 void hiros::skeletons::SkeletonFilter::updateMarkerFilters(hiros::skeletons::types::Skeleton& skeleton)
@@ -64,10 +116,11 @@ void hiros::skeletons::SkeletonFilter::updateMarkerFilters(hiros::skeletons::typ
   for (auto& mk : skeleton.markers) {
     if (marker_filters_.count(mk.id) == 0) {
       // add new markers
-      marker_filters_[mk.id] =
-        KinematicStateFilter(filter_type_, cutoff_frequency_, sample_frequency_, butterworth_order_);
+      initMarkerFilter(mk, skeleton.src_time);
     }
-    marker_filters_[mk.id].filter(mk.center, skeleton.src_time);
+    else {
+      marker_filters_[mk.id].filter(mk.center, skeleton.src_time);
+    }
   }
 }
 
@@ -79,10 +132,11 @@ void hiros::skeletons::SkeletonFilter::updateLinkFilters(hiros::skeletons::types
   for (auto& lk : skeleton.links) {
     if (link_filters_.count(lk.id) == 0) {
       // new link
-      link_filters_[lk.id] =
-        KinematicStateFilter(filter_type_, cutoff_frequency_, sample_frequency_, butterworth_order_);
+      initLinkFilter(lk, skeleton.src_time);
     }
-    link_filters_[lk.id].filter(lk.center, skeleton.src_time);
+    else {
+      link_filters_[lk.id].filter(lk.center, skeleton.src_time);
+    }
   }
 }
 
