@@ -5,10 +5,10 @@
 #include <map>
 
 // ROS dependencies
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 // Custom external dependencies
-#include "hiros_skeleton_msgs/SkeletonGroup.h"
+#include "hiros_skeleton_msgs/msg/skeleton_group.hpp"
 #include "skeletons/types.h"
 
 // Internal dependencies
@@ -18,60 +18,60 @@
 #define BASH_MSG_GREEN "\033[32m"
 
 namespace hiros {
-  namespace skeletons {
+namespace skeletons {
 
-    static const std::map<std::string, Type> filter_str_to_type = {{"statespace", Type::StateSpace},
-                                                                   {"butterworth", Type::Butterworth}};
+class Filter : public rclcpp::Node {
+ public:
+  Filter();
+  ~Filter();
 
-    struct Parameters
-    {
-      std::string input_topic;
-      std::string output_topic;
+ private:
+  static const std::map<std::string, FilterType> k_filter_str_to_type;
 
-      std::string filter_type;
-      int butterworth_order;
-      double sample_frequency;
-      double cutoff_frequency;
-    };
+  struct Parameters {
+    std::string input_topic{};
+    std::string output_topic{};
 
-    class Filter
-    {
-    public:
-      Filter() {}
-      ~Filter() {}
+    std::string filter_type{};
+    int butterworth_order{};
+    double sample_frequency{};
+    double cutoff_frequency{};
+  };
 
-      void configure();
-      void start();
+  template <typename T>
+  bool getParam(const std::string& name, T& parameter) {
+    declare_parameter<T>(name);
+    return get_parameter(name, parameter);
+  }
 
-    private:
-      void stop();
-      void setupRosTopics();
+  void start();
+  void stop() const;
+  void configure();
 
-      void callback(const hiros_skeleton_msgs::SkeletonGroup& msg);
+  void getParams();
+  void setupRosTopics();
 
-      void filter();
-      void publish();
+  void filter();
+  void filter(hiros::skeletons::types::Skeleton& skeleton);
+  void initFilters(hiros::skeletons::types::Skeleton& skeleton);
+  void eraseUnusedFilters();
 
-      void eraseUnusedFilters();
-      void filter(hiros::skeletons::types::Skeleton& skeleton);
+  void publish();
 
-      void init(hiros::skeletons::types::Skeleton& skeleton);
+  void callback(const hiros_skeleton_msgs::msg::SkeletonGroup& msg);
 
-      ros::NodeHandle nh_{"~"};
-      Parameters params_{};
+  rclcpp::Subscription<hiros_skeleton_msgs::msg::SkeletonGroup>::SharedPtr
+      sub_{};
+  rclcpp::Publisher<hiros_skeleton_msgs::msg::SkeletonGroup>::SharedPtr pub_{};
 
-      ros::Subscriber in_skeleton_group_sub_{};
-      ros::Publisher out_skeleton_group_pub_{};
+  Parameters params_{};
 
-      hiros::skeletons::types::SkeletonGroup skeleton_group_{};
+  hiros::skeletons::types::SkeletonGroup skeleton_group_{};
+  // map<skeleton_id, skeleton_filter>
+  std::map<int, SkeletonFilter> filters_{};
+};
 
-      // map<skeleton_id, skeleton_filter>
-      std::map<int, SkeletonFilter> filters_{};
-
-      bool configured_{false};
-    };
-
-  } // namespace skeletons
-} // namespace hiros
+}  // namespace skeletons
+}  // namespace hiros
 
 #endif

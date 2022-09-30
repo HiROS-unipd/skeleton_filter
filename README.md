@@ -8,20 +8,10 @@ This ROS package takes as input a skeleton group and performs low-pass filtering
 * [Hi-ROS Skeleton Messages](https://github.com/hiros-unipd/skeleton_msgs)
 
 
-## Launch files
-**default.launch**
-Contains the default values for each parameter
-
-**custom\_configuration\_example.launch**
-Contains an example on how to set some parameters of choice
-
-
 ## Parameters
 
 | Parameter           | Description                                                                   |
 | ------------------- | ----------------------------------------------------------------------------- |
-| `node_required`     | Set if the other ROS nodes on the PC should be killed when the node is killed |
-| `node_name`         | Node name                                                                     |
 | `input_topic`       | Topic containing the input skeletons                                          |
 | `output_topic`      | Topic that will be published containing the filtered skeletons                |
 | `filter`            | Filter to use (`statespace` or `butterworth`)                                 |
@@ -32,5 +22,5 @@ Contains an example on how to set some parameters of choice
 
 ## Usage
 ```
-roslaunch hiros_skeleton_filter custom_configuration_example.launch
+ros2 launch hiros_skeleton_filter default.launch.py
 ```
