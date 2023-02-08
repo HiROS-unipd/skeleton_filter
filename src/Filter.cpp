@@ -17,15 +17,13 @@ hiros::skeletons::Filter::~Filter() { stop(); }
 void hiros::skeletons::Filter::start() {
   configure();
 
-  RCLCPP_INFO_STREAM(get_logger(), BASH_MSG_GREEN
-                                       << "Hi-ROS Skeleton Filter... RUNNING"
-                                       << BASH_MSG_RESET);
+  RCLCPP_INFO_STREAM(get_logger(),
+                     BASH_MSG_GREEN << "Running" << BASH_MSG_RESET);
 }
 
 void hiros::skeletons::Filter::stop() const {
-  RCLCPP_INFO_STREAM(get_logger(), BASH_MSG_GREEN
-                                       << "Hi-ROS Skeleton Filter... STOPPED"
-                                       << BASH_MSG_RESET);
+  RCLCPP_INFO_STREAM(get_logger(),
+                     BASH_MSG_GREEN << "Stopped" << BASH_MSG_RESET);
 
   rclcpp::shutdown();
 }
@@ -44,34 +42,30 @@ void hiros::skeletons::Filter::getParams() {
   getParam("cutoff_frequency", params_.cutoff_frequency);
 
   if (k_filter_str_to_type.count(params_.filter_type) <= 0) {
-    RCLCPP_FATAL_STREAM(get_logger(),
-                        "Hi-ROS Skeleton Filter ERROR: Filter type '"
-                            << params_.filter_type
-                            << "' not supported. Unable to continue");
+    RCLCPP_FATAL_STREAM(
+        get_logger(), "Filter type '" << params_.filter_type
+                                      << "' not supported. Unable to continue");
     stop();
     exit(EXIT_FAILURE);
   }
 
   if (params_.filter_type == "butterworth" && params_.butterworth_order <= 0) {
     RCLCPP_FATAL_STREAM(get_logger(),
-                        "Hi-ROS Skeleton Filter ERROR: Butterworth order <= 0. "
-                        "Unable to continue");
+                        "Butterworth order <= 0. Unable to continue");
     stop();
     exit(EXIT_FAILURE);
   }
 
   if (params_.filter_type == "butterworth" && params_.sample_frequency <= 0) {
     RCLCPP_FATAL_STREAM(get_logger(),
-                        "Hi-ROS Skeleton Filter ERROR: Sample frequency <= 0. "
-                        "Unable to continue");
+                        "Sample frequency <= 0. Unable to continue");
     stop();
     exit(EXIT_FAILURE);
   }
 
   if (params_.cutoff_frequency <= 0) {
     RCLCPP_FATAL_STREAM(get_logger(),
-                        "Hi-ROS Skeleton Filter ERROR: Cutoff frequency <= 0. "
-                        "Unable to continue");
+                        "Cutoff frequency <= 0. Unable to continue");
     stop();
     exit(EXIT_FAILURE);
   }
