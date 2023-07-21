@@ -1,17 +1,17 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
+
 def generate_launch_description():
     ld = LaunchDescription()
 
-    node=Node(
-        package = 'hiros_skeleton_filter',
-        executable = 'hiros_skeleton_filter',
-        name = 'skeleton_filter',
+    node = Node(
+        package='hiros_skeleton_filter',
+        executable='hiros_skeleton_filter',
+        name='skeleton_filter',
         namespace='hiros',
-        output = 'screen',
-        parameters = [
-            # General Parameters
+        output='screen',
+        parameters=[
             {'input_topic': '/input/topic'},
             {'output_topic': '/output/topic'},
             {'filter': 'butterworth'},
