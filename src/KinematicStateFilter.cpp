@@ -153,8 +153,7 @@ void hiros::skeletons::KinematicStateFilter::computeOrientation(
   }
 
   // Filter
-  auto weight{
-      std::max(0., std::min((time - last_time_) * cutoff_frequency_, 1.))};
+  auto weight{std::clamp((time - last_time_) * cutoff_frequency_, 0., 1.)};
   last_state_.pose.orientation =
       last_state_.pose.orientation.slerp(state.pose.orientation, weight);
 
@@ -189,7 +188,7 @@ void hiros::skeletons::KinematicStateFilter::computeAngularVelocity(
   ang_vel.setZ(delta_yaw / dt);
 
   // Filter
-  auto weight{std::max(0., std::min(dt * cutoff_frequency_, 1.))};
+  auto weight{std::clamp(dt * cutoff_frequency_, 0., 1.)};
   last_state_.velocity.angular =
       last_state_.velocity.angular.lerp(ang_vel, weight);
 
@@ -216,7 +215,7 @@ void hiros::skeletons::KinematicStateFilter::computeAngularAcceleration(
                dt};
 
   // Filter
-  auto weight{std::max(0., std::min(dt * cutoff_frequency_, 1.))};
+  auto weight{std::clamp(dt * cutoff_frequency_, 0., 1.)};
   last_state_.acceleration.angular =
       last_state_.acceleration.angular.lerp(ang_acc, weight);
 
